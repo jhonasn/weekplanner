@@ -1,0 +1,20 @@
+<EventCard>
+    adaptive_size: True
+    padding: 5
+    size_hint: None, None
+    size: "250dp", "100dp"
+    on_release: root.change_card()
+
+    MDRelativeLayout:
+
+        MDIconButton:
+            icon: "dots-vertical"
+            pos_hint: {"top": 1, "right": 1}
+
+        MDLabel:
+            id: label
+            text: root.text
+            adaptive_size: True
+            color: "grey"
+            pos: "12dp", "12dp"
+            bold: True
