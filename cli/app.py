@@ -1,19 +1,22 @@
-from ..shared.activity import Activity
-from ..shared.repository import activities, list_day_activities
+from ..shared.classes.activity import Activity
+from ..shared.classes.period import Period
+from ..shared.repository import activities, todayActivities
+from ..shared.service import list_day_activities
 from .ui import select_time, edit_activity, assign_activity, info, confirm, select_activity
 
 def init():
     day, selected_act = list_day_activities()
     show_day(day, selected_act)
 
-def show_day(day: list[Activity], start_row):
+def show_day(day: list[Period], start_row):
     buffer: list[str] = []
     buffer.append('NEW Activity')
     buffer.append('CHANGE Activity')
     buffer.append('DELETE Activity')
-    buffer += [str(act) for act in day]
+    buffer += [str(period) for period in day]
     buffer.append('QUIT exit')
     selected = select_time(buffer, start_row + 4)
+    import pdb;pdb.set_trace()
     if selected:
         if 'exit' in selected:
             return
@@ -28,14 +31,13 @@ def show_day(day: list[Activity], start_row):
             else:
                 print('INVALID OPTION 🤔')
         else:
-            act = day[index - 3]
-            activity_assignment(act)
-            # print('i:', index, 's:', selected, 'a:', act)
+            period = day[index - 3]
+            activity_assignment(period)
+            # print('i:', index, 's:', selected, 'a:', period)
         init()
 
 def change_activity(action):
     if action == 'NEW':
-        print('yes new')
         act = edit_activity()
         if act:
             activities.append(act)
@@ -61,15 +63,18 @@ def activity_selection(title):
     index = buffer.index(selected)
     return activities[index]
 
-def activity_assignment(act: Activity):
-    time = act.time()
-    # import pdb;pdb.set_trace()
-    if act.is_free() and not activities:
-        act = edit_activity(act, True)
-    # selected_act = activity_selection(f'SELECT one activity to {time}')
-    # selected_act.start = act.start
-    # selected_act.end = act.end
-    assign_activity(act)
+def activity_assignment(period: Period):
+    time = period.time()
+    is_new_activity = period.activity.is_free() and not activities
+    if is_new_activity:
+        selected_act = edit_activity(period.activity, True)
+        if selected_act:
+            activities.append(selected_act)
+    else:
+        selected_act = activity_selection(f'SELECT one activity to {time}')
+    period = assign_activity(period, selected_act)
+    if period:
+        todayActivities.append(period)
 
 if __name__ == 'weekplanner.cli.app':
     init()

@@ -1,7 +1,9 @@
 from subprocess import Popen, PIPE
 from pyfzf.pyfzf import FzfPrompt
 from datetime import datetime
-from ..shared.activity import Activity, week_time, week_day
+from ..shared.classes.activity import Activity
+from ..shared.classes.period import Period
+from ..shared.helpers import week_time, week_day
 from ..shared.repository import activities
 
 fzf = FzfPrompt()
@@ -31,8 +33,6 @@ def edit_activity(act: Activity=None, warn: bool=False):
         info("There's no activities registered, you're being redirected to create a new activity")
     changed_act = act.clone() if act else Activity()
 
-    cmd_header('New Activity:')
-
     if not changed_act.is_free():
         option = confirm(f'Do you want to change the name from {act.name}')
         if option:
@@ -48,10 +48,6 @@ def edit_activity(act: Activity=None, warn: bool=False):
     if changed_act.alarm:
         changed_act.alarm = select('Select alarm sound:', ['old', 'ring', 'android'])
 
-    # cmd_header('The new activity:')
-    # print(changed_act.detail())
-    # print()
-
     save = confirm('Do you want to save?', preview=changed_act.detail())
     if save:
         if act and not act.is_free():
@@ -61,10 +57,6 @@ def edit_activity(act: Activity=None, warn: bool=False):
         return None
 
 def select_datetime(title: str, date: datetime):
-    # week_days = list(map(lambda i: week_day(i), range(7)))
-    # day = select(f'{title} - day of the week:', week_days)
-    # day = week_days.index(day)
-    # hour = select(f'{title} - hour:', range(24))
     hour = str(date.hour).rjust(2, '0')
     fifteen_minutes = lambda i: str(i * 15).rjust(2, '0')
     minutes=list(map(
@@ -76,26 +68,21 @@ def select_datetime(title: str, date: datetime):
     minute = int(minute.split(':')[1])
     return date.replace(hour=hour,minute=minute, second=0, microsecond=0)
 
-def assign_activity(act: Activity):
-    changed_act = act.clone()
-    changed_act.start = select_datetime('START DAY', act.start)
-    changed_act.end = select_datetime('END DAY', act.end)
-    time = changed_act.time()
+def assign_activity(period: Period, act: Activity):
+    changed_period = period.clone()
+    changed_period.activity = act
+    changed_period.start = select_datetime('START DAY', period.start)
+    changed_period.end = select_datetime('END DAY', period.end)
+    time = changed_period.time()
     
     save = confirm(f'Do you want to assign {act.name} to {time}?',
-                   preview=changed_act.detail_full())
+                   preview=changed_period.detail())
     # TODO: verify time conflicts
-    # already_on_activities = list(filter(
-        # lambda a: a.name == act.name and a.start and a.end,
-        # activities
-    # ))
     if save:
-        # if already_on_activities:
-            # activities.append(changed_act)
-        # else:
-            # act.update(changed_act)
-        activities.append(changed_act)
-    return changed_act
+        # period.update(changed_period) ???
+        return changed_period
+    else:
+        return None
 
 def select(header, options):
     response = fzf.prompt(options, f'--header "{header}"')
@@ -115,20 +102,3 @@ def confirm(question: str, as_bool: bool = True, preview=None):
 
 def info(say):
     return fzf.prompt(['Ok'], f'--header "ℹ {say}"')
-
-def cmd_header(title):
-    print('--------------------------------------')
-    print(title)
-    print('--------------------------------------')
-    print()
-
-# process = Popen(command, stdout=PIPE, stderr=PIPE)
-# stdout, stderr = process.communicate()
-# print(stdout, stderr)
-# Popen(f"bash -c 'fzf --preselect=\\'{selected}\\' <<< \"{lines}\"'", shell=True)
-    # bash -c "fzf --preselect='{selected}' <<< '{lines}'"
-# with open('./temp', 'w') as f:
-    # f.write(lines)
-# cmd = f"cat ./temp | fzf --sync --bind start:pos:{row}"
-# print(cmd)
-# Popen(cmd, shell=True)
