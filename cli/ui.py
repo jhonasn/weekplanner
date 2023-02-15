@@ -1,8 +1,8 @@
 from subprocess import Popen, PIPE
 from pyfzf.pyfzf import FzfPrompt
 from datetime import datetime
-from .src.activity import Activity, week_time, week_day
-from .src.repository import activities
+from ..shared.activity import Activity, week_time, week_day
+from ..shared.repository import activities
 
 fzf = FzfPrompt()
 

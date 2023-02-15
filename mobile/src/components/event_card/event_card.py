@@ -15,4 +15,5 @@ class EventCard(MDCard):
 
         print('Change card: ', self.text)
 
-Builder.load_file('semanapp/components/event_card/event_card.kv')
+# Builder.load_file('weekplanner/mobile/src/components/event_card/event_card.kv')
+Builder.load_file('mobile/src/components/event_card/event_card.kv')

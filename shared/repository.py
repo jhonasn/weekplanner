@@ -5,9 +5,9 @@ from .activity import Activity
 activities: list[Activity] = []
 class TIME_COLLISION_TYPE(Enum):
     START = 1
-    END
-    INSIDE
-    OUTSIDE
+    END = 2
+    INSIDE = 3
+    OUTSIDE = 4
 
 def list_day_activities():
     now = datetime.now()

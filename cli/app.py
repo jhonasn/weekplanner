@@ -1,5 +1,5 @@
-from .src.activity import Activity
-from .src.repository import activities, list_day_activities
+from ..shared.activity import Activity
+from ..shared.repository import activities, list_day_activities
 from .ui import select_time, edit_activity, assign_activity, info, confirm, select_activity
 
 def init():
@@ -71,5 +71,5 @@ def activity_assignment(act: Activity):
     # selected_act.end = act.end
     assign_activity(act)
 
-if __name__ == 'semanapp.app':
+if __name__ == 'weekplanner.cli.app':
     init()

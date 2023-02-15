@@ -2,4 +2,5 @@
 import os
 os.environ['SDL_VIDEO_X11_WMCLASS'] = 'float'
 
-import weekplanner.app
+print('main mobile')
+import weekplanner.mobile.src.app

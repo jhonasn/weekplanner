@@ -2,6 +2,7 @@ from datetime import datetime
 from kivy.lang import Builder
 from kivy.clock import Clock
 from kivymd.app import MDApp
+# print('Name', __name__)
 from .components.event_card.event_card import EventCard
 from kivymd.uix.pickers import MDTimePicker
 # import kivymd.icon_definitions as icons
@@ -12,7 +13,7 @@ class MainApp(MDApp):
         self.time = None;
         self.theme_cls.theme_style = 'Dark'
         self.theme_cls.primary_palette = 'Purple'
-        return Builder.load_file('semanapp/app.kv')
+        return Builder.load_file('mobile/src/app.kv')
 
     # def on_start(self):
         # for i in range(20):
@@ -58,8 +59,6 @@ class MainApp(MDApp):
         print('ALARM!', self.time)
         self.root.ids.title.text = f'ALARM of {self.time}'
 
-# print('Name', __name__)seconds.seconds +
-# if __name__ == '__main__':
-if __name__ == 'semanapp.app':
+if __name__ == 'weekplanner.mobile.src.app':
     app = MainApp()
     app.run()

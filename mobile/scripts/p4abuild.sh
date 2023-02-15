@@ -1,4 +1,4 @@
-p4a apk --private . \
+p4a apk --private .. \
 	--package=org.jojo.semanapp \
 	--name "My library" \
 	--version 0.1 \
