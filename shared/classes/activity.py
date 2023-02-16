@@ -9,6 +9,7 @@ class Activity:
     color: str = 'white'
     notification: bool = None
     alarm: str|bool = None
+    id: int = None
     # occurences: list[Period] = []
 
     def __repr__(self):

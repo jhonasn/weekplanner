@@ -4,7 +4,6 @@ from datetime import datetime
 from ..shared.classes.activity import Activity
 from ..shared.classes.period import Period
 from ..shared.helpers import week_time, week_day
-from ..shared.repository import activities
 
 fzf = FzfPrompt()
 
@@ -21,7 +20,7 @@ def select_time(lines, row):
     )
     return single_result(selected)
 
-def select_activity(title):
+def select_activity(title, activities):
     selected = fzf.prompt(
         activities,
         f'--reverse --sync --header "🏋 {title}"'

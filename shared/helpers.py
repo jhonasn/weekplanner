@@ -12,6 +12,8 @@ def week_time():
     return datetime.now().strftime('%A - %H:%M')
 
 def format_timedelta(time):
+    if type(time) is datetime:
+        return time.strftime('%H:%M')
     time = str(time)
     if 'day' in time:
         time = time.split(', ')[1]

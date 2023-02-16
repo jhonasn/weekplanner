@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from .classes.activity import Activity
 from .classes.period import Period
-from .repository import todayActivities
+from .repository import create_database, select, insert, update, delete, count as countdb
 
 class TIME_COLLISION_TYPE(Enum):
     START = 1
@@ -10,8 +10,36 @@ class TIME_COLLISION_TYPE(Enum):
     INSIDE = 3
     OUTSIDE = 4
 
+create_database()
+
+# activities: list[Activity] = []
+# todayActivities: list[Period] = []
+def period_adjust_data(obj: Period|Activity):
+    if type(obj) is Period:
+        obj.start = obj.start.seconds
+        obj.end = obj.end.seconds
+
+def query(obj: Period|Activity):
+    select(obj,condition='1=1')
+def add(obj: Period|Activity):
+    period_adjust_data(obj)
+    insert(obj)
+def save(obj: Period|Activity):
+    period_adjust_data(obj)
+    update(obj)
+def remove(obj: Period|Activity):
+    delete(obj)
+def count(obj: Period|Activity):
+    countdb(obj,condition='1=1')
+
 def list_day_activities():
     now = datetime.now()
+    start = timedelta(days=now.weekday())
+    end = timedelta(days=now.weekday() + 1)
+    end = end - timedelta(seconds=1)
+    queryPeriod = Period(start.seconds, end.seconds)
+    import pdb;pdb.set_trace()
+    todayActivities = select(queryPeriod, condition='start >= ? and end <= ?')
     today = datetime(now.year, now.month, now.day)
     one_hour = timedelta(hours=1)
     day: list[Period] = []
