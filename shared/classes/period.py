@@ -1,46 +1,56 @@
 from dataclasses import dataclass
-from datetime import datetime
-from .activity import Activity
+from datetime import datetime, timedelta
+from peewee import CharField, DateTimeField, ForeignKeyField, BooleanField
+from playhouse.hybrid import hybrid_property
 from ..helpers import format_timedelta
+from .activity import Activity
+from .base import Base
+from ..repository import db
 
-@dataclass
-class Period:
-    start: datetime = None
-    end: datetime = None
-    activity: Activity = None
-    id: int = None
-    activity_id: int = None
-
-    def __post_init__(self):
-        self.activity = Activity()
+class Period(Base):
+    start = DateTimeField()
+    end = DateTimeField()
+    activity: Activity = ForeignKeyField(Activity, null=True)
 
     def __repr__(self):
         time = self.time()
         act = str(self.activity) if self.activity else ''
         return f'{time} {act}'
 
-    def time_start(self):
-        # return self.start.strftime('%H:%M') if self.start else 'XX:XX'
-        return format_timedelta(self.start) if self.start else 'XX:XX'
+    def __str__(self):
+        return self.__repr__()
 
-    def time_end(self):
-        return format_timedelta(self.end) if self.end else 'XX:XX'
+    def date_to_current_week(self, date: datetime):
+        now = datetime.now()
+        # get this week start time
+        monday = now - timedelta(days=now.weekday())
+        monday = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        # get time from the start of the date week until the current timestamp
+        _, _, _, h, m, s, wd, *_ = date.timetuple()
+        time_week = timedelta(wd, hours=h, minutes=m, seconds=s)
+        # set timestamp in current week
+        return monday + time_week
+
+    @hybrid_property
+    def start_current_week():
+        return self.date_to_current_week(self.start)
+
+    @hybrid_property
+    def end_current_week():
+        return self.date_to_current_week(self.end)
+
+    def time_format(self, time: datetime):
+        return time.strftime('%H:%M') if time else 'XX:XX'
+
+    def format_times(self):
+        return self.time_format(self.start), self.time_format(self.end)
 
     def time(self):
-        start = self.time_start()
-        end = self.time_end()
+        start, end = self.format_times()
         return f'{start} {end}'
 
-    def clone(self):
-        return Period(self.start, self.end, self.activity)
-
-    def update(self, period):
-        self.start = period.start
-        self.end = period.end
-        self.activity = period.activity
-
     def detail(self):
-        start = self.time_start()
-        end = self.time_end()
+        start, end = self.format_times()
         return self.activity.detail() + f'\nstart: {start}\nend: {end}'
 
+db.create_tables(Period)

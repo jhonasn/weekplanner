@@ -1,20 +1,21 @@
 from dataclasses import dataclass
-# from .period import Period
+from peewee import CharField, BooleanField
+from .base import Base
+from ..repository import db
 
 NO_ACTIVITY = 'FREE'
 
-@dataclass
-class Activity:
-    name: str = NO_ACTIVITY
-    color: str = 'white'
-    notification: bool = None
-    alarm: str|bool = None
-    id: int = None
-    # occurences: list[Period] = []
+class Activity(Base):
+    name = CharField(default=NO_ACTIVITY)
+    color = CharField(default='white')
+    notification = BooleanField()
+    alarm = CharField()
 
     def __repr__(self):
         return f'{self.name} [{self.color}]'
-        # return f'{self.name} [{self.color}] - {len(self.occurences)} times a week'
+
+    def __str__(self):
+        return self.__repr__()
 
     def is_free(self):
         return self.name == NO_ACTIVITY
@@ -30,21 +31,6 @@ class Activity:
 
     def detail_full(self):
         detail = self.detail()
-        # detail += 'occurences:\n'
-        # occurences = [str(oc) for oc in self.occurences]
-        # occurences = '\n'.join(occurences)
-        # return detail + occurences
         return detail
 
-    def clone(self):
-        return Activity(
-            self.name, self.color,
-            self.notification, self.alarm
-        )
-
-    def update(self, act):
-        self.name = act.name
-        self.color = act.color
-        self.notification = act.notification
-        self.alarm = act.alarm
-
+db.create_tables(Activity)

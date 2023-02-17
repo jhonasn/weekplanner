@@ -12,7 +12,7 @@ def single_result(selected):
         return None
     return selected[0]
 
-def select_time(lines, row):
+def list_today(lines, row):
     time = week_time()
     selected = fzf.prompt(
         lines,
@@ -21,6 +21,9 @@ def select_time(lines, row):
     return single_result(selected)
 
 def select_activity(title, activities):
+    activities.append('NEW Activity')
+    activities.append('CHANGE Time period')
+    activities.append('FREE Time period')
     selected = fzf.prompt(
         activities,
         f'--reverse --sync --header "🏋 {title}"'
@@ -30,30 +33,23 @@ def select_activity(title, activities):
 def edit_activity(act: Activity=None, warn: bool=False):
     if warn:
         info("There's no activities registered, you're being redirected to create a new activity")
-    changed_act = act.clone() if act else Activity()
-
-    if not changed_act.is_free():
+    if not act:
+        act = Activity()
+    if not act.is_free():
         option = confirm(f'Do you want to change the name from {act.name}')
         if option:
-            changed_act.name = input('name: ')
+            act.name = input('name: ')
         option = confirm(f'Do you want to change the color from {act.name}')
         if option:
-            changed_act.color = input('color: ')
+            act.color = input('color: ')
     else:
-        changed_act.name = input('name: ')
-        changed_act.color = input('color: ')
-    changed_act.notification = confirm('Do you want to notify when this activity is about to start?')
-    changed_act.alarm = confirm('Do you want to set a alarm sound when this activity is about to start?')
-    if changed_act.alarm:
-        changed_act.alarm = select('Select alarm sound:', ['old', 'ring', 'android'])
-
-    save = confirm('Do you want to save?', preview=changed_act.detail())
-    if save:
-        if act and not act.is_free():
-            act.update(changed_act)
-        return changed_act
-    else:
-        return None
+        act.name = input('name: ')
+        act.color = input('color: ')
+    act.notification = confirm('Do you want to notify when this activity is about to start?')
+    act.alarm = confirm('Do you want to set a alarm sound when this activity is about to start?')
+    if act.alarm:
+        act.alarm = select('Select alarm sound:', ['old', 'ring', 'android'])
+    return act if confirm('Do you want to save?', preview=act.detail()) else False
 
 def select_datetime(title: str, date: datetime):
     hour = str(date.hour).rjust(2, '0')
@@ -67,21 +63,14 @@ def select_datetime(title: str, date: datetime):
     minute = int(minute.split(':')[1])
     return date.replace(hour=hour,minute=minute, second=0, microsecond=0)
 
-def assign_activity(period: Period, act: Activity):
-    changed_period = period.clone()
-    changed_period.activity = act
-    changed_period.start = select_datetime('START DAY', period.start)
-    changed_period.end = select_datetime('END DAY', period.end)
-    time = changed_period.time()
+def assign_activity(period: Period):
+    period.start = select_datetime('START DAY', period.start)
+    period.end = select_datetime('END DAY', period.end)
+    time = period.time()
     
-    save = confirm(f'Do you want to assign {act.name} to {time}?',
-                   preview=changed_period.detail())
     # TODO: verify time conflicts
-    if save:
-        # period.update(changed_period) ???
-        return changed_period
-    else:
-        return None
+    return confirm(f'Do you want to assign {period.activity.name} to {time}?',
+                   preview=period.detail())
 
 def select(header, options):
     response = fzf.prompt(options, f'--header "{header}"')

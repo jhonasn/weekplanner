@@ -1,2 +1,4 @@
 pyfzf
-pysqlite
+#pysqlite
+#simple-orm
+peewee
